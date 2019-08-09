@@ -38,9 +38,10 @@ node{
             SFDC_USERNAME=robj.result.username
             robj = null
             print "scratch org created with username ${SFDC_USERNAME}..."
-            }stage('Push To Test Org') {
+            }
+            stage('Push To Test Org') {
                 rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:source:push --targetusername ${SFDC_USERNAME}"
-                if (rc != 0) {error 'push all failed...'}
+               if (rc != 0) {error 'push all failed...'}
                 print "push all completed.."// assign permset
                 rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:user:permset:assign --targetusername ${SFDC_USERNAME} --permsetname ebikes"
                 if (rc != 0) {error 'push permission set failed...'}
