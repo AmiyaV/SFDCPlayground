@@ -11,8 +11,10 @@ node{
 
     println 'All environment variables to be printed here..'
     println BUILD_NUMBER
-    println RUN_ARTIFACT_DIRprintln SFDC_USERNAME
-    println HUB_ORGprintln SFDC_HOST
+    println RUN_ARTIFACT_DIR
+    println SFDC_USERNAME
+    println HUB_ORG
+    println SFDC_HOST
     println JWT_KEY_CRED_ID
     println CONNECTED_APP_CONSUMER_KEY
 
