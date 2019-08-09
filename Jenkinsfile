@@ -24,10 +24,8 @@ node{
         print "JWT Key Credential Id Fetched successfully"
         stage('Create Scratch Org') {
             print "connecting to Salesforce..."
-            rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:auth:jwt:grant --clientid
-            ${CONNECTED_APP_CONSUMER_KEY} --username ${HUB_ORG} --jwtkeyfile ${jwt_key_file} --
-            setdefaultdevhubusername --instanceurl ${SFDC_HOST}"
-            f (rc != 0) { error 'hub org authorization failed' }
+            rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:auth:jwt:grant --clientid ${CONNECTED_APP_CONSUMER_KEY} --username ${HUB_ORG} --jwtkeyfile ${jwt_key_file} -- setdefaultdevhubusername --instanceurl ${SFDC_HOST}"
+            if (rc != 0) { error 'hub org authorization failed' }
             
             rmsg = sh returnStdout: true, script: "${toolbelt}/sfdx force:org:create -f config/project-scratch-def.json -a ebikes --setdefaultusername --json"
             printf rmsg
@@ -38,20 +36,17 @@ node{
             robj = null
             print "scratch org created with username ${SFDC_USERNAME}..."
             }stage('Push To Test Org') {
-                rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:source:push --targetusername 
-                ${SFDC_USERNAME}"
+                rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:source:push --targetusername ${SFDC_USERNAME}"
                 if (rc != 0) {error 'push all failed...'}
                 print "push all completed.."// assign permset
-                rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:user:permset:assign --targetusername
-                ${SFDC_USERNAME} --permsetname ebikes"
+                rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:user:permset:assign --targetusername ${SFDC_USERNAME} --permsetname ebikes"
                 if (rc != 0) {error 'push permission set failed...'}
                 print "push permission set completed..."}
 
                 stage('Run Apex Test') {
                     sh "mkdir -p ${RUN_ARTIFACT_DIR}"
                     timeout(time: 120, unit: 'SECONDS') {
-                        rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:apex:test:run --testlevel RunLocalTests --
-                        outputdir ${RUN_ARTIFACT_DIR} --resultformat json --targetusername ${SFDC_USERNAME}"
+                        rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:apex:test:run --testlevel RunLocalTests -- outputdir ${RUN_ARTIFACT_DIR} --resultformat json --targetusername ${SFDC_USERNAME}"
                         if (rc != 0) {error 'apex test run failed...'}}                       
                                          
                         print "apex test run completed..."}
@@ -63,8 +58,7 @@ node{
 
                     stage('Delete Test Org') {
                         timeout(time: 120, unit: 'SECONDS') {
-                        rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:org:delete --targetusername 
-                        ${SFDC_USERNAME} --noprompt"
+                        rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:org:delete --targetusername ${SFDC_USERNAME} --noprompt"
                         if (rc != 0) {error 'org deletion request failed'}}
                     print "Org delete request completed"
                     }
